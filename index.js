@@ -7,7 +7,7 @@ import {checkIfPossibleTmdbId, handleErrorResponse} from "./src/helpers/helper.j
 import {ErrorObject} from "./src/helpers/ErrorObject.js";
 
 const PORT = process.env.PORT;
-const allowedOrigins = ["https://cinepro.mintlify.app"]; // localhost is also allowed. (from any localhost port)
+const allowedOrigins = ["https://moviepluto.fun"]; // localhost is also allowed. (from any localhost port)
 const app = express();
 
 app.use(cors({
