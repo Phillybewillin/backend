@@ -1,13 +1,12 @@
 import express from "express";
-import {scrapeMedia} from "./src/api.js";
-import {getMovieFromTmdb, getTvFromTmdb} from "./src/helpers/tmdb.js";
+import {scrapeMedia} from "../src/api.js";
+import {getMovieFromTmdb, getTvFromTmdb} from "../src/helpers/tmdb.js";
 import cors from "cors";
-import {strings} from "./src/strings.js";
-import {checkIfPossibleTmdbId, handleErrorResponse} from "./src/helpers/helper.js";
-import {ErrorObject} from "./src/helpers/ErrorObject.js";
+import {strings} from "../src/strings.js";
+import {checkIfPossibleTmdbId, handleErrorResponse} from "../src/helpers/helper.js";
+import {ErrorObject} from "../src/helpers/ErrorObject.js";
 
-const PORT = process.env.PORT;
-const allowedOrigins = ["https://moviepluto.fun"]; // localhost is also allowed. (from any localhost port)
+const allowedOrigins = ["https://moviepluto.fun"];
 const app = express();
 
 app.use(cors({
@@ -74,11 +73,4 @@ app.get("*", (req, res) => {
     handleErrorResponse(res, new ErrorObject(strings.ROUTE_NOT_FOUND, "user", 404, strings.ROUTE_NOT_FOUND_HINT, true, false));
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port http://localhost:${PORT};`);
-    if (process.argv.includes("--debug")) {
-        console.log(`Debug mode is enabled.`);
-    } else {
-        console.log("Debug mode is disabled.");
-    }
-});
+export default app; // This is the crucial change
