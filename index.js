@@ -29,6 +29,9 @@ const parseAllowedOrigins = (allowedOrigins) => {
 const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS) || [];
 const app = express();
 
+// Trust Vercel's reverse proxy to properly detect HTTPS
+app.set('trust proxy', true);
+
 app.use(
     cors({
         origin: (origin, callback) => {
@@ -85,7 +88,8 @@ app.get('/movie/:tmdbId', async (req, res) => {
     if (output instanceof ErrorObject) {
         return handleErrorResponse(res, output);
     }
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+    // Force HTTPS on Vercel/production, use req.protocol for local dev
+    const protocol = process.env.VERCEL ? 'https' : (req.protocol || 'http');
     const processedOutput = processApiResponse(
         output,
         `${protocol}://${req.get('host')}`
@@ -126,7 +130,8 @@ app.get('/tv/:tmdbId', async (req, res) => {
     if (output instanceof ErrorObject) {
         return handleErrorResponse(res, output);
     }
-    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+    // Force HTTPS on Vercel/production, use req.protocol for local dev
+    const protocol = process.env.VERCEL ? 'https' : (req.protocol || 'http');
     const processedOutput = processApiResponse(
         output,
         `${protocol}://${req.get('host')}`
