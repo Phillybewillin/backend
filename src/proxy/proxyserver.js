@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
 import { extractOriginalUrl } from './parser.js';
-import { getServerUrl } from '../helpers/helper.js';
 import { handleCors } from './handleCors.js';
 import { proxyM3U8 } from './m3u8proxy.js';
 import { proxyTs } from './proxyTs.js';
@@ -45,7 +44,10 @@ export function createProxyRoutes(app) {
             }
 
             // Get server URL for building proxy URLs
-            const serverUrl = getServerUrl(req);
+            const protocol =
+                req.headers['x-forwarded-proto'] || req.protocol || 'https';
+            const host = req.headers.host;
+            const serverUrl = `${protocol}://${host}`;
 
             proxyM3U8(targetUrl, headers, res, serverUrl).catch(err => {
                 console.error('[M3U8 Proxy Internal Error]:', err);
@@ -118,7 +120,10 @@ export function createProxyRoutes(app) {
             return;
         }
 
-        const serverUrl = getServerUrl(req);
+        const protocol =
+            req.headers['x-forwarded-proto'] || req.protocol || 'https';
+        const host = req.headers.host;
+        const serverUrl = `${protocol}://${host}`;
 
         proxyM3U8(targetUrl, headers, res, serverUrl);
     });
