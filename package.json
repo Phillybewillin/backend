@@ -1,7 +1,7 @@
 {
   "name": "cinepro-backend",
-  "version": "0.0.1-beta",
-  "description": "Backend API of CinePro (scraper)",
+  "version": "1.0.2",
+  "description": "Backend API of CinePro (scraper) — includes optimized TS/HLS proxy",
   "main": "index.js",
   "homepage": "https://cinepro.mintlify.app/",
   "bugs": {
@@ -20,17 +20,35 @@
     "url": "https://github.com/orgs/cinepro-org/teams/devs/"
   },
   "license": "SEE LICENSE ON https://cinepro.mintlify.app/general-information/license#in-a-nutshell",
-  "dependencies": {
-    "axios": "^1.7.9",
-    "base-64": "^1.0.0",
-    "cheerio": "^1.0.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.18.2",
-    "node-fetch": "^3.3.2",
-    "unpacker": "^1.0.1"
+  "engines": {
+    "node": ">=18.0.0"
   },
-  "keywords": ["cinepro", "movie", "tv show", "scraper"],
+  "dependencies": {
+    "axios": "^1.13.2",
+    "base-64": "^1.0.0",
+    "cheerio": "^1.1.2",
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "node-cache": "^5.1.2",
+    "node-fetch": "^3.3.2",
+    "prettier": "^3.7.4",
+    "unpacker": "^1.0.1",
+    "wyzie-lib": "^2.2.6"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  },
+  "keywords": [
+    "cinepro",
+    "movie",
+    "tv show",
+    "scraper",
+    "proxy",
+    "hls",
+    "ts"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cinepro-org/backend.git"

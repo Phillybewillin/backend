@@ -1,4 +1,4 @@
-import {strings} from "../strings.js";
+import { strings } from '../strings.js';
 
 /**
  * Represents an error object that encapsulates details about an error, including
@@ -16,17 +16,24 @@ export class ErrorObject {
      * Constructs an instance of the ErrorObject class.
      *
      * @param {string} message - The error message.
-     * @param {string} provider - The provider where the error occurred (e.g., "backend", "VidSrcVip").
+     * @param {string} provider - The provider where the error occurred (e.g., "backend", "Vidrock").
      * @param {number} responseCode - The HTTP response code associated with the error. Null if not applicable.
      * @param {string} hint - If it goes to the frontend this is the hint to help extract the error. In the backend it is a note/hint for the developer of what could be the cause of the error.
      * @param {boolean} goesToFrontend - Whether the error should be sent to the frontend. Also influences the format of the error.
      * @param {boolean} issueLink - Whether to include an issue reporting link in the error.
      */
-    constructor(message, provider, responseCode, hint, goesToFrontend = false, issueLink = false) {
-        this._message = message || "Unknown error";
-        this._provider = provider || "backend";
+    constructor(
+        message,
+        provider,
+        responseCode,
+        hint,
+        goesToFrontend = false,
+        issueLink = false
+    ) {
+        this._message = message || 'Unknown error';
+        this._provider = provider || 'backend';
         this._responseCode = responseCode || 500;
-        this._hint = hint || "No hint available";
+        this._hint = hint || 'No hint available';
         this._goesToFrontend = goesToFrontend;
         this._issueLink = issueLink;
     }
@@ -149,13 +156,16 @@ export class ErrorObject {
                 location_key: this._provider,
                 response: this._responseCode,
                 hint: this._hint,
-                reportTo: "Please report this error and as many details as possible to us by using this link: " + strings.DEFAULT_ISSUE_LINK,
+                reportTo:
+                    'Please report this error and as many details as possible to us by using this link: ' +
+                    strings.DEFAULT_ISSUE_LINK,
                 error: true
             };
         } else if (this._goesToFrontend) {
             return {
                 message: this._message,
                 response: this._responseCode,
+                location_key: this._provider,
                 hint: this._hint,
                 error: true
             };
@@ -163,7 +173,7 @@ export class ErrorObject {
             return {
                 message: this._message,
                 location_key: this._provider,
-                "what could be the cause?": this._hint
+                'what could be the cause?': this._hint
             };
         }
     }

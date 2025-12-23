@@ -18,5 +18,8 @@ ARG PORT=3000
 ENV PORT=${PORT}
 EXPOSE ${PORT}
 
+# Add api key
+ENV TMDB_API_KEY=your_api_key_here
+
 # Start the app
 CMD ["npm", "deploy"]
