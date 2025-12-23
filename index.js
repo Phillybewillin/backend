@@ -9,7 +9,8 @@ import cors from 'cors';
 import { strings } from './src/strings.js';
 import {
     checkIfPossibleTmdbId,
-    handleErrorResponse
+    handleErrorResponse,
+    getServerUrl
 } from './src/helpers/helper.js';
 import { ErrorObject } from './src/helpers/ErrorObject.js';
 import { getCacheStats } from './src/cache/cache.js';
@@ -28,7 +29,7 @@ const parseAllowedOrigins = (allowedOrigins) => {
 // localhost is also allowed. (from any localhost port)
 const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS) || [];
 const app = express();
-app.set('trust proxy', 1); // Trust the first proxy (e.g. Cloudflare, Nginx) to get correct protocol (https)
+app.set('trust proxy', true); // Trust the first proxy (e.g. Cloudflare, Nginx) to get correct protocol (https)
 
 app.use(
     cors({
@@ -88,7 +89,7 @@ app.get('/movie/:tmdbId', async (req, res) => {
     }
     const processedOutput = processApiResponse(
         output,
-        `${req.protocol}://${req.get('host')}`
+        getServerUrl(req)
     );
 
     res.status(200).json(processedOutput);
@@ -128,7 +129,7 @@ app.get('/tv/:tmdbId', async (req, res) => {
     }
     const processedOutput = processApiResponse(
         output,
-        `${req.protocol}://${req.get('host')}`
+        getServerUrl(req)
     );
 
     res.status(200).json(processedOutput);
