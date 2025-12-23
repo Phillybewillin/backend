@@ -88,8 +88,8 @@ app.get('/movie/:tmdbId', async (req, res) => {
     if (output instanceof ErrorObject) {
         return handleErrorResponse(res, output);
     }
-    // Force HTTPS on Vercel/production, use req.protocol for local dev
-    const protocol = process.env.VERCEL ? 'https' : (req.protocol || 'http');
+    // Force HTTPS if PRODUCTION env var is set to 'true'
+    const protocol = process.env.PRODUCTION === 'true' ? 'https' : (req.protocol || 'http');
     const processedOutput = processApiResponse(
         output,
         `${protocol}://${req.get('host')}`
@@ -130,8 +130,8 @@ app.get('/tv/:tmdbId', async (req, res) => {
     if (output instanceof ErrorObject) {
         return handleErrorResponse(res, output);
     }
-    // Force HTTPS on Vercel/production, use req.protocol for local dev
-    const protocol = process.env.VERCEL ? 'https' : (req.protocol || 'http');
+    // Force HTTPS if PRODUCTION env var is set to 'true'
+    const protocol = process.env.PRODUCTION === 'true' ? 'https' : (req.protocol || 'http');
     const processedOutput = processApiResponse(
         output,
         `${protocol}://${req.get('host')}`

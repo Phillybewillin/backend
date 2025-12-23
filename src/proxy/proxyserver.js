@@ -44,8 +44,8 @@ export function createProxyRoutes(app) {
             }
 
             // Get server URL for building proxy URLs
-            // Force HTTPS on Vercel/production, use req.protocol for local dev
-            const protocol = process.env.VERCEL ? 'https' : (req.protocol || 'http');
+            // Force HTTPS if PRODUCTION env var is set to 'true'
+            const protocol = process.env.PRODUCTION === 'true' ? 'https' : (req.protocol || 'http');
             const host = req.headers.host;
             const serverUrl = `${protocol}://${host}`;
 
@@ -120,8 +120,8 @@ export function createProxyRoutes(app) {
             return;
         }
 
-        // Force HTTPS on Vercel/production, use req.protocol for local dev
-        const protocol = process.env.VERCEL ? 'https' : (req.protocol || 'http');
+        // Force HTTPS if PRODUCTION env var is set to 'true'
+        const protocol = process.env.PRODUCTION === 'true' ? 'https' : (req.protocol || 'http');
         const host = req.headers.host;
         const serverUrl = `${protocol}://${host}`;
 
