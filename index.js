@@ -28,6 +28,7 @@ const parseAllowedOrigins = (allowedOrigins) => {
 // localhost is also allowed. (from any localhost port)
 const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS) || [];
 const app = express();
+app.set('trust proxy', 1); // Trust the first proxy (e.g. Cloudflare, Nginx) to get correct protocol (https)
 
 app.use(
     cors({
