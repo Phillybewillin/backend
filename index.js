@@ -1,3 +1,4 @@
+import './src/utils/silence.js';
 import express from 'express';
 import { scrapeMedia, getProviderStats } from './src/api.js';
 import {
@@ -18,10 +19,6 @@ import { fileURLToPath } from 'url';
 
 const PORT = process.env.PORT;
 
-// Silence console.log in production to improve performance and reduce noise
-if (process.env.PRODUCTION === 'true') {
-    console.log = function () { };
-}
 
 const parseAllowedOrigins = (allowedOrigins) => {
     if (!allowedOrigins) return [];
