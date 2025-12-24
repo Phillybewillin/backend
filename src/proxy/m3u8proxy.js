@@ -43,6 +43,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
     const MAX_RETRIES = 4;
     let lastError = null;
     let successfulResponse = null;
+    let successfulHeaders = null;
 
     // Default Chrome UA (Modern, consistent with simple-proxy/scraper behavior)
     const CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
@@ -99,6 +100,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
             if (response.ok) {
                 console.log(`[M3U8 Proxy] Attempt ${attempt} SUCCESS! Status: ${response.status}`);
                 successfulResponse = response;
+                successfulHeaders = fetchHeaders;
                 break; // Exit loop on success
             } else {
                 console.warn(`[M3U8 Proxy] Attempt ${attempt} failed: ${response.status} ${response.statusText}`);
@@ -130,6 +132,9 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
         const lines = m3u8Content.split('\n');
         const newLines = [];
 
+        // headerParam to use for children is the ONE THAT WORKED.
+        const headerParamForChildren = encodeHeadersParam(successfulHeaders);
+
         if (m3u8Content.includes("EXT-X-STREAM-INF")) {
             for (const line of lines) {
                 const trimmed = line.trim();
@@ -144,7 +149,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                         const match = trimmed.match(regex);
                         if (match && match[1]) {
                             const keyUrl = resolveUrl(match[1], targetUrl);
-                            const proxyKeyUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(keyUrl)}&headers=${encodeHeadersParam(headers)}`;
+                            const proxyKeyUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(keyUrl)}&headers=${headerParamForChildren}`;
                             newLines.push(trimmed.replace(match[1], proxyKeyUrl));
                         } else {
                             newLines.push(line);
@@ -154,7 +159,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                         const match = trimmed.match(regex);
                         if (match && match[1]) {
                             const mediaUrl = resolveUrl(match[1], targetUrl);
-                            const proxyMediaUrl = `${baseProxyUrl}/m3u8-proxy?url=${encodeURIComponent(mediaUrl)}&headers=${encodeHeadersParam(headers)}`;
+                            const proxyMediaUrl = `${baseProxyUrl}/m3u8-proxy?url=${encodeURIComponent(mediaUrl)}&headers=${headerParamForChildren}`;
                             newLines.push(trimmed.replace(match[1], proxyMediaUrl));
                         } else {
                             newLines.push(line);
@@ -164,7 +169,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                         const match = trimmed.match(regex);
                         if (match && match[1]) {
                             const mapUrl = resolveUrl(match[1], targetUrl);
-                            const proxyMapUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(mapUrl)}&headers=${encodeHeadersParam(headers)}`;
+                            const proxyMapUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(mapUrl)}&headers=${headerParamForChildren}`;
                             newLines.push(trimmed.replace(match[1], proxyMapUrl));
                         } else {
                             newLines.push(line);
@@ -174,7 +179,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                     }
                 } else {
                     const variantUrl = resolveUrl(trimmed, targetUrl);
-                    const proxyUrl = `${baseProxyUrl}/m3u8-proxy?url=${encodeURIComponent(variantUrl)}&headers=${encodeHeadersParam(headers)}`;
+                    const proxyUrl = `${baseProxyUrl}/m3u8-proxy?url=${encodeURIComponent(variantUrl)}&headers=${headerParamForChildren}`;
                     newLines.push(proxyUrl);
                 }
             }
@@ -194,7 +199,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                         const match = trimmed.match(regex);
                         if (match && match[1]) {
                             const keyUrl = resolveUrl(match[1], targetUrl);
-                            const proxyKeyUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(keyUrl)}&headers=${encodeHeadersParam(headers)}`;
+                            const proxyKeyUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(keyUrl)}&headers=${headerParamForChildren}`;
                             newLines.push(trimmed.replace(match[1], proxyKeyUrl));
                         } else {
                             newLines.push(line);
@@ -205,7 +210,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                         const match = trimmed.match(regex);
                         if (match && match[1]) {
                             const mapUrl = resolveUrl(match[1], targetUrl);
-                            const proxyMapUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(mapUrl)}&headers=${encodeHeadersParam(headers)}`;
+                            const proxyMapUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(mapUrl)}&headers=${headerParamForChildren}`;
                             newLines.push(trimmed.replace(match[1], proxyMapUrl));
                         } else {
                             newLines.push(line);
@@ -216,7 +221,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                 } else {
                     // Segment URL
                     const segmentUrl = resolveUrl(trimmed, targetUrl);
-                    const proxyUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(segmentUrl)}&headers=${encodeHeadersParam(headers)}`;
+                    const proxyUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(segmentUrl)}&headers=${headerParamForChildren}`;
                     newLines.push(proxyUrl);
                 }
             }
