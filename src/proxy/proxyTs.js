@@ -121,7 +121,7 @@ export async function proxyTs(targetUrl, headersParam, req, res) {
             const bitrate = (bytesTransferred * 8) / (totalTime / 1000); // bits per second
             const requiredBitrate = 5000000; // 5 Mbps minimum for 1080p
 
-            if (bitrate < requiredBitrate) {
+            if (bitrate < requiredBitrate && process.env.PRODUCTION !== 'true') {
                 console.warn(`[TS] ${segmentName} - WARNING: Low bitrate ${(bitrate / 1000000).toFixed(2)} Mbps < 5 Mbps required for 1080p`);
             }
         }
@@ -132,7 +132,7 @@ export async function proxyTs(targetUrl, headersParam, req, res) {
         // Don't log canceled requests (client disconnected)
         if (error.code !== 'ECONNRESET' && error.message !== 'aborted') {
             console.error(`[TS] ${segmentName} - ERROR after ${totalTime}ms:`, error.message);
-        } else {
+        } else if (process.env.PRODUCTION !== 'true') {
             console.log(`[TS] ${segmentName} - Client disconnected after ${totalTime}ms, ${bytesTransferred} bytes sent`);
         }
 

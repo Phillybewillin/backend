@@ -17,6 +17,12 @@ import { startup } from './src/utils/startup.js';
 import { fileURLToPath } from 'url';
 
 const PORT = process.env.PORT;
+
+// Silence console.log in production to improve performance and reduce noise
+if (process.env.PRODUCTION === 'true') {
+    console.log = function () { };
+}
+
 const parseAllowedOrigins = (allowedOrigins) => {
     if (!allowedOrigins) return [];
     const stripped = allowedOrigins.trim().replace(/^\[|\]$/g, '');
