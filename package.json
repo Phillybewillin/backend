@@ -13,7 +13,7 @@
     "dev": "node --watch index.js --debug",
     "main": "node --watch index.js",
     "deploy": "node --watch index.js",
-    "start": "node --watch index.js"
+    "start": "node index.js"
   },
   "author": {
     "name": "CinePro Dev Team and All contributors",
@@ -21,7 +21,7 @@
   },
   "license": "SEE LICENSE ON https://cinepro.mintlify.app/general-information/license#in-a-nutshell",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "dependencies": {
     "axios": "^1.13.2",

@@ -2,6 +2,7 @@
 .idea/
 .vscode/
 test.js
+vercel.json
 
 # Logs
 logs
