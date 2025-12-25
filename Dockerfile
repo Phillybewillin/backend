@@ -1,25 +1,27 @@
 # Use the official Node image
-FROM node:18-alpine
+FROM node:20-alpine
 
-# Set working directory
+# Set working directory to /app instead of root
 WORKDIR /
 
 # Copy dependencies files
-COPY package*.json ./
+COPY package*.json ./   
 
-# Install dependencies
-RUN npm install
+# Install only production dependencies
+RUN npm install --omit=dev
 
 # Copy app source
 COPY . .
 
-# Expose port
+# Environment variables and build arguments
 ARG PORT=3000
-ENV PORT=${PORT}
+ENV PORT=${PORT} \
+    TMDB_API_KEY=your_api_key_here \
+    ALLOWED_ORIGINS='["http://localhost:3000", "https://tv.moviepluto.fun"]' \
+    PRODUCTION=true
+
+# Expose port
 EXPOSE ${PORT}
 
-# Add api key
-ENV TMDB_API_KEY=your_api_key_here
-
 # Start the app
-CMD ["npm", "deploy"]
+CMD ["npm", "start"]
