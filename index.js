@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import './src/utils/silence.js';
 import express from 'express';
 import { scrapeMedia, getProviderStats } from './src/api.js';
@@ -32,7 +33,6 @@ const parseAllowedOrigins = (allowedOrigins) => {
 const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS) || [];
 const app = express();
 
-// Trust Vercel's reverse proxy to properly detect HTTPS
 app.set('trust proxy', true);
 
 app.use(

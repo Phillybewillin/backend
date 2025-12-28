@@ -59,9 +59,21 @@ function decodeHunter(h, u, n, t, e, r = '') {
     return decodeURIComponent(r);
 }
 
-export async function getMultiembed(params) {
-    const { imdb } = params;
-    let baseUrl = `https://multiembed.mov/?video_id=${imdb}`;
+export async function getMultiembed(media) {
+    const { imdb, tmdb, type, season, episode } = media;
+    let baseUrl = 'https://multiembed.mov/';
+
+    if (tmdb) {
+        baseUrl += `?video_id=${tmdb}&tmdb=1`;
+    } else if (imdb) {
+        baseUrl += `?video_id=${imdb}`;
+    } else {
+        throw new Error('No valid ID found');
+    }
+
+    if (type === 'tv') {
+        baseUrl += `&s=${season}&e=${episode}`;
+    }
 
     try {
         if (baseUrl.includes('multiembed')) {

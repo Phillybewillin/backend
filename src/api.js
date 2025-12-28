@@ -32,6 +32,7 @@ import {
 import { validateAndFilterFiles, quickValidate } from './utils/sourceValidator.js';
 
 import { getUembed } from './controllers/providers/Uembed/uembed.js';
+import { getVidLink } from './controllers/providers/VidLink/VidLink.js';
 
 
 const shouldDebug = process.argv.includes('--debug');
@@ -39,17 +40,19 @@ const shouldDebug = process.argv.includes('--debug');
 // Provider configuration with default timeouts
 const PROVIDER_CONFIG = {
     // Video providers (Tier 1 - most reliable)
+    getVidRock: { fn: getVidRock, tier: 1, defaultTimeout: 15000 },
+
     getUembed: { fn: getUembed, tier: 1, defaultTimeout: 20000 },
     getFmovies4u: { fn: getFmovies4u, tier: 1, defaultTimeout: 30000 },
     getVidstorm: { fn: getVidstorm, tier: 1, defaultTimeout: 20000 },
     getTwoEmbed: { fn: getTwoEmbed, tier: 1, defaultTimeout: 20000 },
-    getVidSrc: { fn: getVidSrc, tier: 1, defaultTimeout: 20000 },
-    getVidRock: { fn: getVidRock, tier: 1, defaultTimeout: 15000 },
+    // getVidSrc: { fn: getVidSrc, tier: 1, defaultTimeout: 20000 },
 
     // Video providers (Tier 2 - generally reliable)
     getAutoembed: { fn: getAutoembed, tier: 2, defaultTimeout: 20000 },
     getVidSrcCC: { fn: getVidSrcCC, tier: 2, defaultTimeout: 20000 },
     getMultiembed: { fn: getMultiembed, tier: 2, defaultTimeout: 20000 },
+    // getVidLink: { fn: getVidLink, tier: 2, defaultTimeout: 20000 },
 
     // Video providers (Tier 3 - less reliable or slower)
     getCinemaOS: { fn: getCinemaOS, tier: 3, defaultTimeout: 25000 },
