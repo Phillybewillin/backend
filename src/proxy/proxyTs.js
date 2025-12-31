@@ -22,14 +22,18 @@ export async function proxyTs(targetUrl, headersParam, req, res) {
     // Parse headers
     let headers = {};
     try {
-        headers = typeof headersParam === 'string' ? JSON.parse(headersParam) : (headersParam || {});
+        headers =
+            typeof headersParam === 'string'
+                ? JSON.parse(headersParam)
+                : headersParam || {};
     } catch (e) {
         res.statusCode = 400;
         res.end('Invalid headers format');
         return;
     }
 
-    const CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+    const CHROME_UA =
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
     const segmentName = targetUrl.split('/').pop() || 'segment';
     const startTime = Date.now();
 
@@ -38,7 +42,7 @@ export async function proxyTs(targetUrl, headersParam, req, res) {
     // Optimized headers for TS segments - NO retry logic
     const fetchHeaders = {
         'User-Agent': CHROME_UA,
-        'Accept': '*/*',
+        Accept: '*/*',
         'Accept-Encoding': 'gzip, deflate, br',
         ...headers
     };
@@ -56,7 +60,9 @@ export async function proxyTs(targetUrl, headersParam, req, res) {
         const response = await fetch(targetUrl, { headers: fetchHeaders });
 
         if (!response.ok) {
-            console.error(`[TS] ${segmentName} - Source error: ${response.status}`);
+            console.error(
+                `[TS] ${segmentName} - Source error: ${response.status}`
+            );
             res.statusCode = response.status;
             res.end();
             return;
@@ -64,7 +70,8 @@ export async function proxyTs(targetUrl, headersParam, req, res) {
 
         // Get content info
         const contentLength = response.headers.get('content-length');
-        const contentType = response.headers.get('content-type') || 'video/mp2t';
+        const contentType =
+            response.headers.get('content-type') || 'video/mp2t';
         const expectedSize = contentLength ? parseInt(contentLength) : 0;
 
         // console.log(`[TS] ${segmentName} - Size: ${expectedSize} bytes, Type: ${contentType}`);
@@ -89,11 +96,20 @@ export async function proxyTs(targetUrl, headersParam, req, res) {
 
             // Log progress every 500KB or 1 second
             const now = Date.now();
-            if (now - lastProgressLog > 1000 || bytesTransferred % (512 * 1024) < chunk.length) {
+            if (
+                now - lastProgressLog > 1000 ||
+                bytesTransferred % (512 * 1024) < chunk.length
+            ) {
                 const mb = (bytesTransferred / (1024 * 1024)).toFixed(2);
-                const pct = expectedSize > 0 ? ((bytesTransferred / expectedSize) * 100).toFixed(1) : '?';
+                const pct =
+                    expectedSize > 0
+                        ? ((bytesTransferred / expectedSize) * 100).toFixed(1)
+                        : '?';
                 const elapsed = (now - startTime) / 1000;
-                const speed = elapsed > 0 ? (bytesTransferred / elapsed / 1024 / 1024).toFixed(2) : 0;
+                const speed =
+                    elapsed > 0
+                        ? (bytesTransferred / elapsed / 1024 / 1024).toFixed(2)
+                        : 0;
 
                 // console.log(`[TS] ${segmentName} - ${mb} MB (${pct}%) @ ${speed} MB/s`);
                 lastProgressLog = now;
@@ -104,15 +120,14 @@ export async function proxyTs(targetUrl, headersParam, req, res) {
         const nodeReadable = Readable.fromWeb(response.body);
 
         // Use pipeline for proper backpressure handling
-        await pipeline(
-            nodeReadable,
-            monitorStream,
-            res
-        );
+        await pipeline(nodeReadable, monitorStream, res);
 
         const totalTime = Date.now() - startTime;
         const mbTotal = (bytesTransferred / (1024 * 1024)).toFixed(2);
-        const avgSpeed = totalTime > 0 ? (bytesTransferred / totalTime / 1024).toFixed(1) : 0;
+        const avgSpeed =
+            totalTime > 0
+                ? (bytesTransferred / totalTime / 1024).toFixed(1)
+                : 0;
 
         // console.log(`[TS] ${segmentName} - COMPLETE: ${mbTotal} MB in ${totalTime}ms (${avgSpeed} KB/ms)`);
 
@@ -122,18 +137,24 @@ export async function proxyTs(targetUrl, headersParam, req, res) {
             const requiredBitrate = 5000000; // 5 Mbps minimum for 1080p
 
             if (bitrate < requiredBitrate) {
-                console.warn(`[TS] ${segmentName} - WARNING: Low bitrate ${(bitrate / 1000000).toFixed(2)} Mbps < 5 Mbps required for 1080p`);
+                console.warn(
+                    `[TS] ${segmentName} - WARNING: Low bitrate ${(bitrate / 1000000).toFixed(2)} Mbps < 5 Mbps required for 1080p`
+                );
             }
         }
-
     } catch (error) {
         const totalTime = Date.now() - startTime;
 
         // Don't log canceled requests (client disconnected)
         if (error.code !== 'ECONNRESET' && error.message !== 'aborted') {
-            console.error(`[TS] ${segmentName} - ERROR after ${totalTime}ms:`, error.message);
+            console.error(
+                `[TS] ${segmentName} - ERROR after ${totalTime}ms:`,
+                error.message
+            );
         } else {
-            console.log(`[TS] ${segmentName} - Client disconnected after ${totalTime}ms, ${bytesTransferred} bytes sent`);
+            console.log(
+                `[TS] ${segmentName} - Client disconnected after ${totalTime}ms, ${bytesTransferred} bytes sent`
+            );
         }
 
         // Only send error if headers haven't been sent
@@ -159,4 +180,4 @@ export function getProxyHealth() {
             heap: `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`
         }
     };
-} 
+}

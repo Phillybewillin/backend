@@ -11,10 +11,11 @@ const API_ENDPOINT = `${BASE_URL}/api/scrape`;
 const SOURCE_ORDER = 'flixhq,soapyto,embed2,catflix,gamma';
 
 const requestHeaders = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    'Accept': 'text/event-stream',
-    'Referer': BASE_URL,
-    'Origin': BASE_URL
+    'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    Accept: 'text/event-stream',
+    Referer: BASE_URL,
+    Origin: BASE_URL
 };
 
 /**
@@ -66,7 +67,10 @@ function extractStreamFromFmoviesUrl(proxyUrl) {
                 streamUrl = `${BASE_URL}/${decodedUrl}`;
             } else if (decodedUrl.startsWith('//')) {
                 streamUrl = 'https:' + decodedUrl;
-            } else if (!decodedUrl.startsWith('http://') && !decodedUrl.startsWith('https://')) {
+            } else if (
+                !decodedUrl.startsWith('http://') &&
+                !decodedUrl.startsWith('https://')
+            ) {
                 streamUrl = `${BASE_URL}/${decodedUrl}`;
             } else {
                 streamUrl = decodedUrl;
@@ -98,7 +102,7 @@ function extractStreamFromFmoviesUrl(proxyUrl) {
  * Smart delay function with exponential backoff
  */
 function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -124,7 +128,9 @@ function isServerError(response) {
         ];
 
         const dataStr = response.data.substring(0, 500).toLowerCase();
-        return errorIndicators.some(indicator => dataStr.includes(indicator.toLowerCase()));
+        return errorIndicators.some((indicator) =>
+            dataStr.includes(indicator.toLowerCase())
+        );
     }
 
     return false;
@@ -174,7 +180,10 @@ export async function getFmovies4u(media, attempt = 1) {
             // Network errors (timeout, DNS, etc.)
             console.log(`[Fmovies4u] Network error: ${networkError.message}`);
             if (attempt < maxRetries) {
-                const retryDelay = Math.min(baseDelay * Math.pow(2, attempt - 1), 10000);
+                const retryDelay = Math.min(
+                    baseDelay * Math.pow(2, attempt - 1),
+                    10000
+                );
                 console.log(`[Fmovies4u] Retrying in ${retryDelay}ms...`);
                 await delay(retryDelay);
                 return getFmovies4u(media, attempt + 1);
@@ -184,10 +193,15 @@ export async function getFmovies4u(media, attempt = 1) {
 
         // Check for server errors/cold start
         if (isServerError(response)) {
-            console.log(`[Fmovies4u] Server error detected (Status: ${response.status})`);
+            console.log(
+                `[Fmovies4u] Server error detected (Status: ${response.status})`
+            );
             if (attempt < maxRetries) {
                 // Immediate retry for cold start (no delay for first retry, then exponential)
-                const retryDelay = attempt === 1 ? 0 : Math.min(baseDelay * Math.pow(2, attempt - 2), 8000);
+                const retryDelay =
+                    attempt === 1
+                        ? 0
+                        : Math.min(baseDelay * Math.pow(2, attempt - 2), 8000);
                 console.log(`[Fmovies4u] Retrying in ${retryDelay}ms...`);
                 if (retryDelay > 0) await delay(retryDelay);
                 return getFmovies4u(media, attempt + 1);
@@ -195,34 +209,51 @@ export async function getFmovies4u(media, attempt = 1) {
         }
 
         // If we got HTML instead of SSE, it's likely an error page
-        if (response.data && response.data.trim().startsWith('<!DOCTYPE') ||
-            response.data && response.data.trim().startsWith('<html')) {
+        if (
+            (response.data && response.data.trim().startsWith('<!DOCTYPE')) ||
+            (response.data && response.data.trim().startsWith('<html'))
+        ) {
             console.log(`[Fmovies4u] Received HTML instead of SSE`);
             if (attempt < maxRetries) {
-                const retryDelay = Math.min(baseDelay * Math.pow(2, attempt - 1), 10000);
+                const retryDelay = Math.min(
+                    baseDelay * Math.pow(2, attempt - 1),
+                    10000
+                );
                 console.log(`[Fmovies4u] Retrying in ${retryDelay}ms...`);
                 await delay(retryDelay);
                 return getFmovies4u(media, attempt + 1);
             }
-            return new ErrorObject('Server returned HTML error page', 'Fmovies4u', 500);
+            return new ErrorObject(
+                'Server returned HTML error page',
+                'Fmovies4u',
+                500
+            );
         }
 
         const events = parseSSE(response.data);
 
         // Check for explicit error events in the stream
-        const hasErrorEvent = events.some(e => e.event === 'error');
-        const completedEvents = events.filter(e => e.event === 'completed' && e.data?.stream);
+        const hasErrorEvent = events.some((e) => e.event === 'error');
+        const completedEvents = events.filter(
+            (e) => e.event === 'completed' && e.data?.stream
+        );
 
         // RETRY LOGIC: If error event found OR no completion event found
         if (hasErrorEvent || completedEvents.length === 0) {
             if (attempt < maxRetries) {
                 // Quick retry for empty/no streams
                 const retryDelay = 500; // Short delay for these cases
-                console.log(`[Fmovies4u] Error/Empty received. Retrying in ${retryDelay}ms...`);
+                console.log(
+                    `[Fmovies4u] Error/Empty received. Retrying in ${retryDelay}ms...`
+                );
                 await delay(retryDelay);
                 return getFmovies4u(media, attempt + 1);
             }
-            return new ErrorObject('No streams found after retries', 'Fmovies4u', 404);
+            return new ErrorObject(
+                'No streams found after retries',
+                'Fmovies4u',
+                404
+            );
         }
 
         const files = [];
@@ -234,7 +265,8 @@ export async function getFmovies4u(media, attempt = 1) {
 
             for (const s of stream) {
                 if (s.playlist) {
-                    const { url: streamUrl, headers: extractedHeaders } = extractStreamFromFmoviesUrl(s.playlist);
+                    const { url: streamUrl, headers: extractedHeaders } =
+                        extractStreamFromFmoviesUrl(s.playlist);
 
                     if (!streamUrl) continue;
 
@@ -247,21 +279,29 @@ export async function getFmovies4u(media, attempt = 1) {
                 }
 
                 if (s.captions) {
-                    s.captions.forEach(c => {
-                        if (c.url) subtitles.push({ url: c.url, lang: c.language || 'English' });
+                    s.captions.forEach((c) => {
+                        if (c.url)
+                            subtitles.push({
+                                url: c.url,
+                                lang: c.language || 'English'
+                            });
                     });
                 }
             }
         }
 
         return { files, subtitles };
-
     } catch (error) {
         console.log(`[Fmovies4u] Final attempt failed: ${error.message}`);
 
         // Even on final error, try one immediate retry if it's a cold start type error
-        if (attempt === 1 && error.message.includes('timeout') || error.message.includes('network')) {
-            console.log(`[Fmovies4u] Immediate retry for network/timeout error...`);
+        if (
+            (attempt === 1 && error.message.includes('timeout')) ||
+            error.message.includes('network')
+        ) {
+            console.log(
+                `[Fmovies4u] Immediate retry for network/timeout error...`
+            );
             await delay(500);
             return getFmovies4u(media, attempt + 1);
         }

@@ -41,7 +41,11 @@ function getOrCreateStats(providerName) {
  * @param {number} responseTimeMs - How long the request took
  * @param {number} filesFound - Number of files found (optional)
  */
-export function recordSuccess(providerName, responseTimeMs = 0, filesFound = 0) {
+export function recordSuccess(
+    providerName,
+    responseTimeMs = 0,
+    filesFound = 0
+) {
     const stats = getOrCreateStats(providerName);
 
     stats.successCount++;
@@ -50,10 +54,9 @@ export function recordSuccess(providerName, responseTimeMs = 0, filesFound = 0) 
     stats.consecutiveFailures = 0;
 
     // Update rolling average response time
-    stats.avgResponseTime = (
+    stats.avgResponseTime =
         (stats.avgResponseTime * (stats.totalRequests - 1) + responseTimeMs) /
-        stats.totalRequests
-    );
+        stats.totalRequests;
 
     // Re-enable if it was disabled and now succeeding
     if (stats.isDisabled && stats.consecutiveFailures === 0) {
@@ -124,7 +127,7 @@ export function getProviderTimeout(providerName) {
 
     // Give 2x the average response time, with min/max bounds
     const recommendedTimeout = Math.max(
-        5000,  // Minimum 5 seconds
+        5000, // Minimum 5 seconds
         Math.min(
             30000, // Maximum 30 seconds
             stats.avgResponseTime * 2

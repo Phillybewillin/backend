@@ -14,10 +14,16 @@ export function replaceTemplateVars(url) {
     let result = url;
 
     // Replace patterns like tmstr4.{v1}, tmstr4.{v2}, etc.
-    result = result.replace(/tmstr4\.\{v[1-5]\}/g, 'tmstr4.shadowlandschronicles.com');
+    result = result.replace(
+        /tmstr4\.\{v[1-5]\}/g,
+        'tmstr4.shadowlandschronicles.com'
+    );
 
     // Replace patterns like app2.{v5}
-    result = result.replace(/app2\.\{v[1-5]\}/g, 'app2.shadowlandschronicles.com');
+    result = result.replace(
+        /app2\.\{v[1-5]\}/g,
+        'app2.shadowlandschronicles.com'
+    );
 
     // Catch any remaining {vN} patterns
     result = result.replace(/\{v[1-5]\}/g, 'shadowlandschronicles.com');
@@ -52,9 +58,10 @@ export function buildProxyHeaders(targetUrl, existingHeaders = {}) {
     const sourceOrigin = getOriginFromUrl(targetUrl);
 
     return {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-        'Referer': existingHeaders.Referer || sourceOrigin || targetUrl,
-        'Origin': existingHeaders.Origin || sourceOrigin,
+        'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        Referer: existingHeaders.Referer || sourceOrigin || targetUrl,
+        Origin: existingHeaders.Origin || sourceOrigin,
         ...existingHeaders
     };
 }

@@ -1,10 +1,11 @@
-import {
-    encodeHeadersParam
-} from '../utils/urlHelper.js';
+import { encodeHeadersParam } from '../utils/urlHelper.js';
 import { getProxyHeaders, getAfterResponseHeaders } from './headerUtils.js';
 
 function resolveUrl(relativeOrAbsolute, baseUrl) {
-    if (relativeOrAbsolute.startsWith('http://') || relativeOrAbsolute.startsWith('https://')) {
+    if (
+        relativeOrAbsolute.startsWith('http://') ||
+        relativeOrAbsolute.startsWith('https://')
+    ) {
         return relativeOrAbsolute;
     }
 
@@ -17,7 +18,10 @@ function resolveUrl(relativeOrAbsolute, baseUrl) {
         if (relativeOrAbsolute.startsWith('/')) {
             return `${baseUrlObj.origin}${relativeOrAbsolute}`;
         } else {
-            const basePath = baseUrlObj.pathname.substring(0, baseUrlObj.pathname.lastIndexOf('/') + 1);
+            const basePath = baseUrlObj.pathname.substring(
+                0,
+                baseUrlObj.pathname.lastIndexOf('/') + 1
+            );
             return `${baseUrlObj.origin}${basePath}${relativeOrAbsolute}`;
         }
     }
@@ -25,11 +29,13 @@ function resolveUrl(relativeOrAbsolute, baseUrl) {
 
 function isUrlLine(line) {
     if (!line || line.startsWith('#')) return false;
-    return line.includes('://') ||
+    return (
+        line.includes('://') ||
         line.includes('.m3u8') ||
         line.includes('.ts') ||
         line.includes('.key') ||
-        !line.startsWith('#');
+        !line.startsWith('#')
+    );
 }
 
 export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
@@ -45,7 +51,8 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
     let successfulResponse = null;
 
     // Default Chrome UA (Modern, consistent with simple-proxy/scraper behavior)
-    const CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+    const CHROME_UA =
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         let fetchHeaders = { ...headers };
@@ -88,7 +95,9 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
             fetchHeaders['Sec-Fetch-Site'] = 'cross-site';
         }
 
-        console.log(`[M3U8 Proxy] Attempt ${attempt}/${MAX_RETRIES} for ${targetUrl}`);
+        console.log(
+            `[M3U8 Proxy] Attempt ${attempt}/${MAX_RETRIES} for ${targetUrl}`
+        );
         console.log(`[M3U8 Proxy] Headers:`, JSON.stringify(fetchHeaders));
 
         try {
@@ -97,26 +106,46 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
             });
 
             if (response.ok) {
-                console.log(`[M3U8 Proxy] Attempt ${attempt} SUCCESS! Status: ${response.status}`);
+                console.log(
+                    `[M3U8 Proxy] Attempt ${attempt} SUCCESS! Status: ${response.status}`
+                );
                 successfulResponse = response;
                 break; // Exit loop on success
             } else {
-                console.warn(`[M3U8 Proxy] Attempt ${attempt} failed: ${response.status} ${response.statusText}`);
-                if (response.status === 403 || response.status === 401 || response.status === 500) {
-                    console.warn(`[M3U8 Proxy] Retrying with escalated headers...`);
+                console.warn(
+                    `[M3U8 Proxy] Attempt ${attempt} failed: ${response.status} ${response.statusText}`
+                );
+                if (
+                    response.status === 403 ||
+                    response.status === 401 ||
+                    response.status === 500
+                ) {
+                    console.warn(
+                        `[M3U8 Proxy] Retrying with escalated headers...`
+                    );
                 }
-                lastError = new Error(`Status ${response.status} ${response.statusText}`);
+                lastError = new Error(
+                    `Status ${response.status} ${response.statusText}`
+                );
             }
         } catch (err) {
-            console.warn(`[M3U8 Proxy] Attempt ${attempt} network error: ${err.message}`);
+            console.warn(
+                `[M3U8 Proxy] Attempt ${attempt} network error: ${err.message}`
+            );
             lastError = err;
         }
     }
 
     if (!successfulResponse) {
-        console.error(`[M3U8 Proxy] Failed to fetch after ${MAX_RETRIES} attempts. URL: ${targetUrl}`);
-        res.statusCode = lastError?.message?.includes('Status') ? parseInt(lastError.message.split(' ')[1]) || 500 : 500;
-        res.end(`Failed to fetch M3U8: ${lastError ? lastError.message : 'Unknown error'}`);
+        console.error(
+            `[M3U8 Proxy] Failed to fetch after ${MAX_RETRIES} attempts. URL: ${targetUrl}`
+        );
+        res.statusCode = lastError?.message?.includes('Status')
+            ? parseInt(lastError.message.split(' ')[1]) || 500
+            : 500;
+        res.end(
+            `Failed to fetch M3U8: ${lastError ? lastError.message : 'Unknown error'}`
+        );
         return;
     }
 
@@ -130,7 +159,7 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
         const lines = m3u8Content.split('\n');
         const newLines = [];
 
-        if (m3u8Content.includes("EXT-X-STREAM-INF")) {
+        if (m3u8Content.includes('EXT-X-STREAM-INF')) {
             for (const line of lines) {
                 const trimmed = line.trim();
                 if (!trimmed) {
@@ -145,7 +174,9 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                         if (match && match[1]) {
                             const keyUrl = resolveUrl(match[1], targetUrl);
                             const proxyKeyUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(keyUrl)}&headers=${encodeHeadersParam(headers)}`;
-                            newLines.push(trimmed.replace(match[1], proxyKeyUrl));
+                            newLines.push(
+                                trimmed.replace(match[1], proxyKeyUrl)
+                            );
                         } else {
                             newLines.push(line);
                         }
@@ -155,7 +186,9 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                         if (match && match[1]) {
                             const mediaUrl = resolveUrl(match[1], targetUrl);
                             const proxyMediaUrl = `${baseProxyUrl}/m3u8-proxy?url=${encodeURIComponent(mediaUrl)}&headers=${encodeHeadersParam(headers)}`;
-                            newLines.push(trimmed.replace(match[1], proxyMediaUrl));
+                            newLines.push(
+                                trimmed.replace(match[1], proxyMediaUrl)
+                            );
                         } else {
                             newLines.push(line);
                         }
@@ -165,7 +198,9 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                         if (match && match[1]) {
                             const mapUrl = resolveUrl(match[1], targetUrl);
                             const proxyMapUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(mapUrl)}&headers=${encodeHeadersParam(headers)}`;
-                            newLines.push(trimmed.replace(match[1], proxyMapUrl));
+                            newLines.push(
+                                trimmed.replace(match[1], proxyMapUrl)
+                            );
                         } else {
                             newLines.push(line);
                         }
@@ -195,7 +230,9 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                         if (match && match[1]) {
                             const keyUrl = resolveUrl(match[1], targetUrl);
                             const proxyKeyUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(keyUrl)}&headers=${encodeHeadersParam(headers)}`;
-                            newLines.push(trimmed.replace(match[1], proxyKeyUrl));
+                            newLines.push(
+                                trimmed.replace(match[1], proxyKeyUrl)
+                            );
                         } else {
                             newLines.push(line);
                         }
@@ -206,7 +243,9 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
                         if (match && match[1]) {
                             const mapUrl = resolveUrl(match[1], targetUrl);
                             const proxyMapUrl = `${baseProxyUrl}/ts-proxy?url=${encodeURIComponent(mapUrl)}&headers=${encodeHeadersParam(headers)}`;
-                            newLines.push(trimmed.replace(match[1], proxyMapUrl));
+                            newLines.push(
+                                trimmed.replace(match[1], proxyMapUrl)
+                            );
                         } else {
                             newLines.push(line);
                         }
@@ -225,9 +264,13 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
         finalContent = newLines.join('\n');
 
         // Set response headers using helper
-        const responseHeaders = getAfterResponseHeaders(response.headers, targetUrl);
+        const responseHeaders = getAfterResponseHeaders(
+            response.headers,
+            targetUrl
+        );
         responseHeaders['Content-Type'] = 'application/vnd.apple.mpegurl';
-        responseHeaders['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+        responseHeaders['Cache-Control'] =
+            'no-cache, no-store, must-revalidate';
 
         // Use h3 to set headers
         for (const [key, value] of Object.entries(responseHeaders)) {
@@ -235,7 +278,6 @@ export async function proxyM3U8(targetUrl, headers, res, serverUrl) {
         }
 
         res.end(finalContent);
-
     } catch (error) {
         console.error('[M3U8 Proxy Error]:', error.message);
         if (!res.headersSent) {

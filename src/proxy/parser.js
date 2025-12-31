@@ -75,4 +75,3 @@ function extractOriginalUrl(proxyUrl) {
 }
 
 export { extractOriginalUrl };
-

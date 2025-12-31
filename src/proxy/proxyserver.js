@@ -34,7 +34,10 @@ export function createProxyRoutes(app) {
             try {
                 headers = JSON.parse(req.query.headers || '{}');
             } catch (e) {
-                console.warn('[Proxy] Failed to parse headers JSON:', e.message);
+                console.warn(
+                    '[Proxy] Failed to parse headers JSON:',
+                    e.message
+                );
             }
 
             if (!targetUrl) {
@@ -49,7 +52,7 @@ export function createProxyRoutes(app) {
             const host = req.headers.host;
             const serverUrl = `${protocol}://${host}`;
 
-            proxyM3U8(targetUrl, headers, res, serverUrl).catch(err => {
+            proxyM3U8(targetUrl, headers, res, serverUrl).catch((err) => {
                 console.error('[M3U8 Proxy Internal Error]:', err);
                 if (!res.headersSent) {
                     res.writeHead(500);
@@ -76,7 +79,10 @@ export function createProxyRoutes(app) {
             try {
                 headers = JSON.parse(req.query.headers || '{}');
             } catch (e) {
-                console.warn('[Proxy] Failed to parse headers JSON:', e.message);
+                console.warn(
+                    '[Proxy] Failed to parse headers JSON:',
+                    e.message
+                );
             }
 
             if (!targetUrl) {
@@ -85,13 +91,15 @@ export function createProxyRoutes(app) {
                 return;
             }
 
-            proxyTs(targetUrl, headers, req, res).then((r) => r).catch(err => {
-                console.error('[TS Proxy Internal Error]:', err);
-                if (!res.headersSent) {
-                    res.writeHead(500);
-                    res.end(`Internal TS Proxy Error: ${err.message}`);
-                }
-            });
+            proxyTs(targetUrl, headers, req, res)
+                .then((r) => r)
+                .catch((err) => {
+                    console.error('[TS Proxy Internal Error]:', err);
+                    if (!res.headersSent) {
+                        res.writeHead(500);
+                        res.end(`Internal TS Proxy Error: ${err.message}`);
+                    }
+                });
         } catch (error) {
             console.error('[TS Proxy Route Error]:', error);
             if (!res.headersSent) {

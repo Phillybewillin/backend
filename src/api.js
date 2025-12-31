@@ -29,10 +29,12 @@ import {
     getProviderTimeout,
     getAllStats
 } from './utils/providerHealth.js';
-import { validateAndFilterFiles, quickValidate } from './utils/sourceValidator.js';
+import {
+    validateAndFilterFiles,
+    quickValidate
+} from './utils/sourceValidator.js';
 
 import { getUembed } from './controllers/providers/Uembed/uembed.js';
-
 
 const shouldDebug = process.argv.includes('--debug');
 
@@ -75,7 +77,9 @@ async function runProvider(providerName, providerFn, media, timeoutMs) {
         // Check if provider is healthy before running
         if (!isProviderHealthy(providerName)) {
             if (shouldDebug) {
-                console.log(`[PROVIDER] Skipping ${providerName} - marked as unhealthy`);
+                console.log(
+                    `[PROVIDER] Skipping ${providerName} - marked as unhealthy`
+                );
             }
             return { data: null, provider: providerName, skipped: true };
         }
@@ -91,16 +95,27 @@ async function runProvider(providerName, providerFn, media, timeoutMs) {
 
         // Check if we got valid data
         if (data && !(data instanceof Error || data instanceof ErrorObject)) {
-            const filesCount = Array.isArray(data.files) ? data.files.length : (data.files ? 1 : 0);
+            const filesCount = Array.isArray(data.files)
+                ? data.files.length
+                : data.files
+                  ? 1
+                  : 0;
             recordSuccess(providerName, responseTime, filesCount);
 
             if (shouldDebug) {
-                console.log(`[PROVIDER] ${providerName} succeeded in ${responseTime}ms with ${filesCount} files`);
+                console.log(
+                    `[PROVIDER] ${providerName} succeeded in ${responseTime}ms with ${filesCount} files`
+                );
             }
         } else {
-            recordFailure(providerName, data?.message || 'No valid data returned');
+            recordFailure(
+                providerName,
+                data?.message || 'No valid data returned'
+            );
             if (shouldDebug) {
-                console.log(`[PROVIDER] ${providerName} returned error/empty in ${responseTime}ms`);
+                console.log(
+                    `[PROVIDER] ${providerName} returned error/empty in ${responseTime}ms`
+                );
             }
         }
 
@@ -110,7 +125,10 @@ async function runProvider(providerName, providerFn, media, timeoutMs) {
         recordFailure(providerName, error.message);
 
         if (shouldDebug) {
-            console.error(`[PROVIDER] ${providerName} failed after ${responseTime}ms:`, error.message);
+            console.error(
+                `[PROVIDER] ${providerName} failed after ${responseTime}ms:`,
+                error.message
+            );
         }
 
         return { data: null, provider: providerName, error: error.message };
@@ -140,13 +158,14 @@ export async function scrapeMedia(media) {
         console.log(`[SCRAPE] Starting scrape for ${cacheKey}`);
     }
 
-
     // Separate video providers from subtitle providers
-    const videoProviders = Object.entries(PROVIDER_CONFIG)
-        .filter(([_, config]) => config.tier !== 'subs');
+    const videoProviders = Object.entries(PROVIDER_CONFIG).filter(
+        ([_, config]) => config.tier !== 'subs'
+    );
 
-    const subProviders = Object.entries(PROVIDER_CONFIG)
-        .filter(([_, config]) => config.tier === 'subs');
+    const subProviders = Object.entries(PROVIDER_CONFIG).filter(
+        ([_, config]) => config.tier === 'subs'
+    );
 
     // Run all video providers in parallel with individual timeouts
     const videoPromises = videoProviders.map(([name, config]) => {
@@ -171,22 +190,40 @@ export async function scrapeMedia(media) {
     // Extract and deduplicate files
     // Keep sources from different providers even if same URL (different headers may work better)
     let files = allResults
-        .filter(({ data }) => data && !(data instanceof Error || data instanceof ErrorObject))
-        .flatMap(({ data }) => Array.isArray(data.files) ? data.files : (data.files ? [data.files] : []))
+        .filter(
+            ({ data }) =>
+                data && !(data instanceof Error || data instanceof ErrorObject)
+        )
+        .flatMap(({ data }) =>
+            Array.isArray(data.files)
+                ? data.files
+                : data.files
+                  ? [data.files]
+                  : []
+        )
         .filter(quickValidate) // Quick validation first (no network)
-        .filter((file, index, self) =>
-            file && file.file &&
-            // Keep source if: this is the first occurrence of this URL+source combo
-            self.findIndex(f => f.file === file.file && f.source === file.source) === index
+        .filter(
+            (file, index, self) =>
+                file &&
+                file.file &&
+                // Keep source if: this is the first occurrence of this URL+source combo
+                self.findIndex(
+                    (f) => f.file === file.file && f.source === file.source
+                ) === index
         );
 
     // Extract and deduplicate subtitles
     const subtitles = allResults
-        .filter(({ data }) => data && !(data instanceof Error || data instanceof ErrorObject))
+        .filter(
+            ({ data }) =>
+                data && !(data instanceof Error || data instanceof ErrorObject)
+        )
         .flatMap(({ data }) => data.subtitles || [])
-        .filter((sub, index, self) =>
-            sub && sub.url &&
-            self.findIndex(s => s.url === sub.url) === index
+        .filter(
+            (sub, index, self) =>
+                sub &&
+                sub.url &&
+                self.findIndex((s) => s.url === sub.url) === index
         );
 
     // Skip validation entirely - return all unique sources
@@ -201,12 +238,16 @@ export async function scrapeMedia(media) {
         const validatedFiles = await validateAndFilterFiles(files, true);
 
         if (shouldDebug) {
-            console.log(`[VALIDATE] ${validatedFiles.length}/${files.length} sources passed validation`);
+            console.log(
+                `[VALIDATE] ${validatedFiles.length}/${files.length} sources passed validation`
+            );
         }
 
         files = validatedFiles;
     } else if (shouldDebug) {
-        console.log(`[SCRAPE] Skipping validation, returning all ${files.length} sources`);
+        console.log(
+            `[SCRAPE] Skipping validation, returning all ${files.length} sources`
+        );
     }
 
     // Build final result
@@ -214,14 +255,22 @@ export async function scrapeMedia(media) {
     if (shouldDebug) {
         // In debug mode, include errors and provider info
         const errors = allResults
-            .filter(({ data }) => data instanceof Error || data instanceof ErrorObject)
-            .map(({ data, provider }) => ({ provider, error: data?.message || data?.toString() }));
+            .filter(
+                ({ data }) =>
+                    data instanceof Error || data instanceof ErrorObject
+            )
+            .map(({ data, provider }) => ({
+                provider,
+                error: data?.message || data?.toString()
+            }));
 
-        const providerStats = allResults.map(({ provider, skipped, error }) => ({
-            provider,
-            skipped: !!skipped,
-            error: error || null
-        }));
+        const providerStats = allResults.map(
+            ({ provider, skipped, error }) => ({
+                provider,
+                skipped: !!skipped,
+                error: error || null
+            })
+        );
 
         finalResult = { files, subtitles, errors, providerStats };
     } else {
@@ -234,7 +283,9 @@ export async function scrapeMedia(media) {
     }
 
     if (shouldDebug) {
-        console.log(`[SCRAPE] Completed: ${files.length} files, ${subtitles.length} subtitles`);
+        console.log(
+            `[SCRAPE] Completed: ${files.length} files, ${subtitles.length} subtitles`
+        );
     }
 
     return finalResult;

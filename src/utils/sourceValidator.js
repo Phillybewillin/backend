@@ -72,8 +72,10 @@ export async function validateMp4Source(url, headers = {}) {
 
         // Check content type is video
         const contentType = response.headers.get('content-type') || '';
-        return contentType.includes('video/') ||
-            contentType.includes('application/octet-stream');
+        return (
+            contentType.includes('video/') ||
+            contentType.includes('application/octet-stream')
+        );
     } catch (error) {
         return false;
     }
@@ -119,9 +121,13 @@ export async function validateAndFilterFiles(files, shouldValidate = true) {
             chunk.map(async (file) => {
                 const isValid = await validateSource(file);
                 if (!isValid) {
-                    console.log(`[VALIDATE] FAILED: ${file.source || 'unknown'} - ${file.file?.substring(0, 80)}...`);
+                    console.log(
+                        `[VALIDATE] FAILED: ${file.source || 'unknown'} - ${file.file?.substring(0, 80)}...`
+                    );
                 } else {
-                    console.log(`[VALIDATE] PASSED: ${file.source || 'unknown'}`);
+                    console.log(
+                        `[VALIDATE] PASSED: ${file.source || 'unknown'}`
+                    );
                 }
                 return { file, isValid };
             })
@@ -144,7 +150,9 @@ export async function validateAndFilterFiles(files, shouldValidate = true) {
         }
     }
 
-    console.log(`[VALIDATE] Result: ${validFiles.length}/${files.length} passed`);
+    console.log(
+        `[VALIDATE] Result: ${validFiles.length}/${files.length} passed`
+    );
     return validFiles;
 }
 
@@ -176,7 +184,7 @@ export function quickValidate(file) {
         '{v2}',
         '%7Bv', // URL-encoded {v
         '",\"', // Malformed JSON in URL
-        '67streams.online', // Consistently fails with socket errors
+        '67streams.online' // Consistently fails with socket errors
     ];
 
     for (const pattern of badPatterns) {
