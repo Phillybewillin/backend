@@ -3,14 +3,12 @@
  * User provided snippet
  */
 
-
-
 const headerMap = {
     'X-Cookie': 'Cookie',
     'X-Referer': 'Referer',
     'X-Origin': 'Origin',
     'X-User-Agent': 'User-Agent',
-    'X-X-Real-Ip': 'X-Real-Ip',
+    'X-X-Real-Ip': 'X-Real-Ip'
 };
 
 const blacklistedHeaders = [
@@ -28,15 +26,10 @@ const blacklistedHeaders = [
     'forwarded',
     'x-real-ip',
     'content-length',
-    ...Object.keys(headerMap),
+    ...Object.keys(headerMap)
 ];
 
-function copyHeader(
-    headers,
-    outputHeaders,
-    inputKey,
-    outputKey
-) {
+function copyHeader(headers, outputHeaders, inputKey, outputKey) {
     if (headers.has(inputKey))
         outputHeaders.set(outputKey, headers.get(inputKey) || '');
 }
@@ -47,7 +40,7 @@ export function getProxyHeaders(headers) {
     // default user agent
     output.set(
         'User-Agent',
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/93.0',
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:93.0) Gecko/20100101 Firefox/93.0'
     );
 
     Object.entries(headerMap).forEach((entry) => {
@@ -57,10 +50,7 @@ export function getProxyHeaders(headers) {
     return output;
 }
 
-export function getAfterResponseHeaders(
-    headers,
-    finalUrl
-) {
+export function getAfterResponseHeaders(headers, finalUrl) {
     const output = {};
 
     if (headers.has('Set-Cookie'))
@@ -71,7 +61,7 @@ export function getAfterResponseHeaders(
         'Access-Control-Expose-Headers': '*',
         Vary: 'Origin',
         'X-Final-Destination': finalUrl,
-        ...output,
+        ...output
     };
 }
 

@@ -6,7 +6,9 @@
 import fetch from 'node-fetch';
 
 // Status codes that should trigger a retry
-const RETRYABLE_STATUS_CODES = [429, 500, 502, 503, 504, 520, 521, 522, 523, 524];
+const RETRYABLE_STATUS_CODES = [
+    429, 500, 502, 503, 504, 520, 521, 522, 523, 524
+];
 
 /**
  * Fetch with a timeout
@@ -53,7 +55,10 @@ export async function fetchWithRetry(
             const response = await fetchWithTimeout(url, options, timeoutMs);
 
             // If response is OK or not retryable, return it
-            if (response.ok || !RETRYABLE_STATUS_CODES.includes(response.status)) {
+            if (
+                response.ok ||
+                !RETRYABLE_STATUS_CODES.includes(response.status)
+            ) {
                 return response;
             }
 
@@ -68,7 +73,11 @@ export async function fetchWithRetry(
             lastError = error;
 
             // Only retry on timeout/network errors, not on other errors
-            if (error.name === 'AbortError' || error.code === 'ECONNRESET' || error.code === 'ETIMEDOUT') {
+            if (
+                error.name === 'AbortError' ||
+                error.code === 'ECONNRESET' ||
+                error.code === 'ETIMEDOUT'
+            ) {
                 if (attempt < maxRetries) {
                     const backoffMs = baseBackoffMs * Math.pow(2, attempt);
                     await sleep(backoffMs);
@@ -90,7 +99,7 @@ export async function fetchWithRetry(
  * @returns {Promise<void>}
  */
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -105,7 +114,12 @@ export function withTimeout(promise, timeoutMs, operationName = 'Operation') {
         promise,
         new Promise((_, reject) =>
             setTimeout(
-                () => reject(new Error(`${operationName} timed out after ${timeoutMs}ms`)),
+                () =>
+                    reject(
+                        new Error(
+                            `${operationName} timed out after ${timeoutMs}ms`
+                        )
+                    ),
                 timeoutMs
             )
         )

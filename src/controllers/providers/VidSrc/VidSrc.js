@@ -14,10 +14,16 @@ function replaceTemplateVars(url) {
     if (!url || typeof url !== 'string') return url;
 
     // Replace patterns like tmstr4.{v1}, tmstr4.{v2}, etc. with the correct domain
-    let result = url.replace(/tmstr4\.\{v[1-5]\}/g, 'tmstr4.shadowlandschronicles.com');
+    let result = url.replace(
+        /tmstr4\.\{v[1-5]\}/g,
+        'tmstr4.shadowlandschronicles.com'
+    );
 
     // Replace patterns like app2.{v5} with the correct domain
-    result = result.replace(/app2\.\{v[1-5]\}/g, 'app2.shadowlandschronicles.com');
+    result = result.replace(
+        /app2\.\{v[1-5]\}/g,
+        'app2.shadowlandschronicles.com'
+    );
 
     // Catch any remaining {vN} patterns
     result = result.replace(/\{v[1-5]\}/g, 'shadowlandschronicles.com');

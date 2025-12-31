@@ -12,8 +12,9 @@ const BASE_URL = 'https://vidstorm.ru';
 const PASSPHRASE = 'x7k9mPqT2rWvY8zA5bC3nF6hJ2lK4mN9';
 
 const headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    'Accept': 'application/json, text/plain, */*',
+    'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    Accept: 'application/json, text/plain, */*',
     'Accept-Language': 'en-US,en;q=0.9',
     'sec-ch-ua': '"Chromium";v="131", "Not A Brand";v="24"',
     'sec-ch-ua-mobile': '?0',
@@ -125,7 +126,10 @@ export async function getVidstorm(media) {
 
         if (!response.ok) {
             const errorText = await response.text().catch(() => '');
-            console.log('[Vidstorm] Error response:', errorText.substring(0, 200));
+            console.log(
+                '[Vidstorm] Error response:',
+                errorText.substring(0, 200)
+            );
             return new ErrorObject(
                 `Vidstorm API returned ${response.status}`,
                 'Vidstorm',
@@ -145,7 +149,12 @@ export async function getVidstorm(media) {
         const subtitles = [];
 
         for (const [sourceName, source] of Object.entries(data)) {
-            if (source && source.url && typeof source.url === 'string' && source.url.startsWith('http')) {
+            if (
+                source &&
+                source.url &&
+                typeof source.url === 'string' &&
+                source.url.startsWith('http')
+            ) {
                 files.push({
                     file: source.url,
                     type: source.url.includes('.m3u8') ? 'hls' : 'mp4',

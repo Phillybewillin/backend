@@ -14,9 +14,10 @@ export async function getVidRock(media) {
     console.log('[getVidRock] Generated link from getLink():', link);
 
     // Build correct Referer URL based on media type
-    const refererUrl = media.type === 'tv'
-        ? `${DOMAIN}/tv/${media.tmdb}/${media.season}/${media.episode}`
-        : `${DOMAIN}/movie/${media.tmdb}`;
+    const refererUrl =
+        media.type === 'tv'
+            ? `${DOMAIN}/tv/${media.tmdb}/${media.season}/${media.episode}`
+            : `${DOMAIN}/movie/${media.tmdb}`;
 
     try {
         const requestHeaders = {
@@ -111,8 +112,8 @@ export async function getVidRock(media) {
                 type: source.url.includes('.m3u8')
                     ? 'hls'
                     : source.url.includes('.mp4')
-                        ? 'mp4'
-                        : 'unknown',
+                      ? 'mp4'
+                      : 'unknown',
                 lang: languageMap[source.language] || source.language,
                 headers: {
                     Referer: refererUrl,

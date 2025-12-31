@@ -94,8 +94,8 @@ export async function getUembed(media) {
             );
         }
 
-        const validVideos = data.filter(video => video && video.file);
-        
+        const validVideos = data.filter((video) => video && video.file);
+
         if (validVideos.length === 0) {
             return new ErrorObject(
                 'No valid sources found',
@@ -107,7 +107,7 @@ export async function getUembed(media) {
             );
         }
 
-        const formattedSources = validVideos.map(video => ({
+        const formattedSources = validVideos.map((video) => ({
             file: video.file.trim(),
             type: video.file.includes('.m3u8')
                 ? 'hls'
